@@ -1,0 +1,10 @@
+*~
+session.*
+.org-id-locations
+bookmarks
+diary
+tramp
+auto-save-list/
+eshell/
+tutorial/
+url/
