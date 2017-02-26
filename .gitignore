@@ -3,6 +3,7 @@ session.*
 .org-id-locations
 bookmarks
 diary
+ido.last
 tramp
 auto-save-list/
 elpa/
