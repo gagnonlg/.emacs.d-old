@@ -82,7 +82,9 @@
 	    (setq font-lock-variable-name-face 'python-variable-name-face)))
 
 
-
+;; swap C-\ and C-M-\
+(global-set-key (kbd "C-\\") 'indent-region)
+(global-set-key (kbd "C-M-\\") 'toggle-input-method)
 
 
 (custom-set-variables
@@ -97,3 +99,4 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  )
+
