@@ -4,6 +4,8 @@
 (setq resize-mini-windows t)
 (load-file "~/.emacs.d/org-config.el")
 
+(setq dired-listing-switches "-lh")
+
 (setq python-shell-interpreter "python2")
 (setq python-check-command "pylint2")
 
@@ -28,6 +30,10 @@
 (defun lxplus ()
   (interactive "")
   (find-file "/ssh:lxplus:"))
+
+(defun hades ()
+  (interactive "")
+  (find-file "/ssh:hades:"))
 
 (load-file "~/.emacs.d/gnugo-big-xpms.el")
 
@@ -85,6 +91,9 @@
 ;; swap C-\ and C-M-\
 (global-set-key (kbd "C-\\") 'indent-region)
 (global-set-key (kbd "C-M-\\") 'toggle-input-method)
+
+;; better resolution for doc-view mode
+(setq doc-view-resolution 300) ; default is 100
 
 
 (custom-set-variables
