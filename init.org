@@ -1,0 +1,163 @@
+* SRC block template
+#+BEGIN_SRC emacs-lisp :tangle yes
+#+END_SRC
+* Defuns
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (defun lps ()
+    (interactive "")
+    (find-file "/ssh:lps:"))
+
+  (defun lxplus ()
+    (interactive "")
+    (find-file "/ssh:lxplus:"))
+
+  (defun hades ()
+    (interactive "")
+    (find-file "/ssh:hades:"))
+#+END_SRC
+* Key bindings
+#+BEGIN_SRC emacs-lisp :tangle yes
+;; swap C-\ and C-M-\
+(global-set-key (kbd "C-\\") 'indent-region)
+(global-set-key (kbd "C-M-\\") 'toggle-input-method)
+#+END_SRC
+* Enabled commands
+#+BEGIN_SRC emacs-lisp :tangle yes
+(put 'set-goal-column 'disabled nil)
+#+END_SRC
+* GUI
+#+BEGIN_SRC emacs-lisp :tangle yes
+(tool-bar-mode -1)
+(setq inhibit-startup-screen t)
+(add-to-list 'default-frame-alist
+	     '(font . "inconsolata-12"))
+(setq resize-mini-windows t)
+#+END_SRC
+* Package
+#+BEGIN_SRC emacs-lisp :tangle yes
+(package-initialize)
+#+END_SRC
+* Dired
+#+BEGIN_SRC emacs-lisp :tangle yes
+(setq dired-listing-switches "-lh")
+#+END_SRC
+* Programming
+** Common
+#+BEGIN_SRC emacs-lisp :tangle yes
+(setq common-programming-hook
+      (lambda ()
+	(linum-mode)
+	(column-number-mode)))
+#+END_SRC
+** Python
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (add-hook 'python-mode-hook common-programming-hook)
+  (setq python-shell-interpreter "python2")
+  (setq python-check-command "pylint2")
+#+END_SRC
+*** Syntax highlight
+#+BEGIN_SRC emacs-lisp :tangle yes
+;; https://emacs.stackexchange.com/questions/2957/how-to-customize-syntax-highlight-for-just-a-given-mode/2968
+(make-variable-buffer-local 'font-lock-comment-face)
+(copy-face 'font-lock-comment-face 'python-comment-face)
+(set-face-foreground 'python-comment-face "gray")
+
+(make-variable-buffer-local 'font-lock-string-face)
+(copy-face 'font-lock-string-face 'python-string-face)
+(set-face-foreground 'python-string-face "dimgray")
+
+(make-variable-buffer-local 'font-lock-keyword-face)
+(copy-face 'font-lock-keyword-face 'python-keyword-face)
+(set-face-foreground 'python-keyword-face "black")
+(set-face-bold 'python-keyword-face t)
+
+(make-variable-buffer-local 'font-lock-builtin-face)
+(copy-face 'font-lock-builtin-face 'python-builtin-face)
+(set-face-foreground 'python-builtin-face "black")
+
+(make-variable-buffer-local 'font-lock-function-name-face)
+(copy-face 'font-lock-function-name-face 'python-function-name-face)
+(set-face-foreground 'python-function-name-face "black")
+(set-face-underline 'python-function-name-face t)
+
+(make-variable-buffer-local 'font-lock-variable-name-face)
+(copy-face 'font-lock-variable-name-face 'python-variable-name-face)
+(set-face-foreground 'python-variable-name-face "black")
+
+(make-variable-buffer-local 'font-lock-type-face)
+(copy-face 'font-lock-type-face 'python-type-face)
+(set-face-foreground 'python-type-face "black")
+
+(make-variable-buffer-local 'font-lock-constant-face)
+(copy-face 'font-lock-constant-face 'python-constant-face)
+(set-face-foreground 'python-constant-face "black")
+
+
+(add-hook 'python-mode-hook
+	  (lambda ()
+	    (setq font-lock-comment-face 'python-comment-face)
+	    (setq font-lock-string-face 'python-string-face)
+	    (setq font-lock-doc-face 'python-string-face)
+	    (setq font-lock-keyword-face 'python-keyword-face)
+	    (setq font-lock-builtin-face 'python-builtin-face)
+	    (setq font-lock-function-name-face 'python-function-name-face)
+	    (setq font-lock-constant-face 'python-constant-face)
+	    (setq font-lock-type-face 'python-type-face)
+	    (setq font-lock-variable-name-face 'python-variable-name-face)))
+#+END_SRC
+* Docview
+#+BEGIN_SRC emacs-lisp :tangle yes
+(setq doc-view-resolution 300) ; default is 100
+#+END_SRC
+* Shell
+#+BEGIN_SRC emacs-lisp :tangle yes
+(setq comint-input-ignoredups t)
+#+END_SRC
+* Org
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (global-set-key "\C-cl" 'org-store-link)
+  (global-set-key "\C-cc" 'org-capture)
+  (global-set-key "\C-ca" 'org-agenda)
+  (global-set-key "\C-cb" 'org-iswitchb)
+  (setq org-agenda-files '("~/org/todo.org"))
+  (setq org-default-notes-file "~/org/notes.org")
+  (setq org-todo-keywords '((sequence "TODO(t)"
+                                      "STARTED(s)"
+                                      "WAITING(b@)"
+                                      "|"
+                                      "DONE(d!)"
+                                      "SOMEDAY(o)"
+                                      "CANCELLED(c)")))
+  (setq org-todo-keyword-faces
+        '(("STARTED" . (:foreground "blue" :weight bold))))
+
+  (setq org-capture-templates
+        '(("t" "Todo" entry (file+headline "~/org/todo.org" "Tasks")
+               "* TODO %?\n%U\n%i")
+          ("n" "Note" entry (file+datetree "~/org/notes.org")
+           "* %?\n%i")
+          ("a" "Article" entry (file+headline "~/org/lectures.org" "À lire")
+           "* %?\n%U%i"
+          )))
+
+  (setq org-agenda-skip-scheduled-if-done t)
+
+  (add-hook 'org-agenda-mode-hook
+            (lambda () (hl-line-mode)))
+
+  (defun kanban-agenda (key category)
+    `(,(concat "k" key) ,category
+      ((todo "SOMEDAY")
+       (todo "TODO")
+       (todo "STARTED|WAITING")
+       (todo "DONE"))
+      ((org-agenda-category-filter-preset '(,(concat "+" category))))))
+
+  (setq org-agenda-custom-commands
+        `(("k" . "kanban")
+          ,(kanban-agenda "d" "Deep SUSY")
+          ,(kanban-agenda "i" "IFT6266")
+          ,(kanban-agenda "c" "CTIDE PUB Note")))
+
+#+END_SRC
+
