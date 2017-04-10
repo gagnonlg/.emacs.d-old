@@ -3,23 +3,24 @@
 #+END_SRC
 * Defuns
 #+BEGIN_SRC emacs-lisp :tangle yes
-  (defun lps ()
-    (interactive "")
-    (find-file "/ssh:lps:"))
+      (defun lps ()
+        (interactive "")
+        (find-file "/ssh:lps:"))
 
-  (defun lxplus ()
-    (interactive "")
-    (find-file "/ssh:lxplus:"))
+      (defun lxplus ()
+        (interactive "")
+        (find-file "/ssh:lxplus:"))
 
-  (defun hades ()
-    (interactive "")
-    (find-file "/ssh:hades:"))
+      (defun hades ()
+        (interactive "")
+        (find-file "/ssh:hades:"))
 #+END_SRC
 * Key bindings
 #+BEGIN_SRC emacs-lisp :tangle yes
-;; swap C-\ and C-M-\
-(global-set-key (kbd "C-\\") 'indent-region)
-(global-set-key (kbd "C-M-\\") 'toggle-input-method)
+  ;; swap C-\ and C-M-\
+  (global-set-key (kbd "C-\\") 'indent-region)
+  (global-set-key (kbd "C-M-\\") 'toggle-input-method)
+  (global-set-key (kbd "<f9>") 'recompile)
 #+END_SRC
 * Enabled commands
 #+BEGIN_SRC emacs-lisp :tangle yes
@@ -104,6 +105,12 @@
 	    (setq font-lock-constant-face 'python-constant-face)
 	    (setq font-lock-type-face 'python-type-face)
 	    (setq font-lock-variable-name-face 'python-variable-name-face)))
+#+END_SRC
+** C++
+#+BEGIN_SRC emacs-lisp :tangle ye
+  (add-hook 'c++-mode-hook common-programming-hook)
+  (setq c-default-style '((c++-mode . "stroustrup")
+                          (other . "linux")))
 #+END_SRC
 * Docview
 #+BEGIN_SRC emacs-lisp :tangle yes
