@@ -130,6 +130,7 @@
 (setq comint-input-ignoredups t)
 #+END_SRC
 * Org
+** Divers
 #+BEGIN_SRC emacs-lisp :tangle yes
   (global-set-key "\C-cl" 'org-store-link)
   (global-set-key "\C-cc" 'org-capture)
@@ -176,4 +177,10 @@
           ,(kanban-agenda "c" "CTIDE PUB Note")))
 
 #+END_SRC
-
+   
+** Babel
+#+BEGIN_SRC emacs-lisp :tangle yes
+(require 'ob-python)
+(setq org-src-preserve-indentation t)
+(setq org-src-fontify-natively t)
+#+END_SRC
