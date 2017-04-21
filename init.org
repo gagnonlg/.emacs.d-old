@@ -1,6 +1,15 @@
 * SRC block template
 #+BEGIN_SRC emacs-lisp :tangle yes
 #+END_SRC
+* Emacs source
+#+BEGIN_SRC emacs-lisp :tangle yes
+(setq find-function-C-source-directory
+      (concat "~/sysadmin/packages/emacs/src/emacs-"
+	      (number-to-string emacs-major-version)
+	      "."
+	      (number-to-string emacs-minor-version)
+	      "/src/"))
+#+END_SRC
 * Defuns
 #+BEGIN_SRC emacs-lisp :tangle yes
       (defun lps ()
