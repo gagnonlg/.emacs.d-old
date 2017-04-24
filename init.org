@@ -140,7 +140,7 @@
   (setq org-default-notes-file "~/org/notes.org")
   (setq org-todo-keywords '((sequence "TODO(t)"
                                       "STARTED(s)"
-                                      "WAITING(b@)"
+                                      "WAITING(w@)"
                                       "|"
                                       "DONE(d!)"
                                       "SOMEDAY(o)"
