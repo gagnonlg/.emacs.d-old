@@ -38,6 +38,7 @@
 * GUI
 #+BEGIN_SRC emacs-lisp :tangle yes
 (tool-bar-mode -1)
+(scroll-bar-mode -1)
 (setq inhibit-startup-screen t)
 (add-to-list 'default-frame-alist
 	     '(font . "inconsolata-12"))
@@ -56,6 +57,8 @@
 #+BEGIN_SRC emacs-lisp :tangle yes
 (setq common-programming-hook
       (lambda ()
+	(setq show-trailing-whitespace t)
+        (setq indicate-buffer-boundaries 'right)
 	(linum-mode)
 	(column-number-mode)))
 #+END_SRC
