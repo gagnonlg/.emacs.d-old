@@ -136,6 +136,13 @@
 (setq comint-input-ignoredups t)
 #+END_SRC
 * Org
+** Markup/Export
+#+BEGIN_SRC emacs-lisp :tangle yes
+(require 'ox)
+(add-hook 'org-mode-hook 'turn-on-org-cdlatex)
+(setq org-export-copy-to-kill-ring nil)
+(setq org-export-in-background t)
+#+END_SRC
 ** Divers
 #+BEGIN_SRC emacs-lisp :tangle yes
   (global-set-key "\C-cl" 'org-store-link)
