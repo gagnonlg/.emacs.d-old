@@ -46,6 +46,9 @@
 #+END_SRC
 * Package
 #+BEGIN_SRC emacs-lisp :tangle yes
+(require 'package)
+(add-to-list 'package-archives
+	     '("melpa" . "https://melpa.org/packages/"))
 (package-initialize)
 #+END_SRC
 * Dired
