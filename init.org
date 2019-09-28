@@ -1,49 +1,3 @@
-* SRC block template
-#+BEGIN_SRC emacs-lisp :tangle yes
-#+END_SRC
-* Emacs source
-#+BEGIN_SRC emacs-lisp :tangle yes
-(setq find-function-C-source-directory
-      (concat "~/sysadmin/packages/emacs/src/emacs-"
-	      (number-to-string emacs-major-version)
-	      "."
-	      (number-to-string emacs-minor-version)
-	      "/src/"))
-#+END_SRC
-* Defuns
-#+BEGIN_SRC emacs-lisp :tangle yes
-      (defun lps ()
-        (interactive "")
-        (find-file "/ssh:lps:"))
-
-      (defun lxplus ()
-        (interactive "")
-        (find-file "/ssh:lxplus:"))
-
-      (defun hades ()
-        (interactive "")
-        (find-file "/ssh:hades:"))
-#+END_SRC
-* Key bindings
-#+BEGIN_SRC emacs-lisp :tangle yes
-  ;; swap C-\ and C-M-\
-  (global-set-key (kbd "C-\\") 'indent-region)
-  (global-set-key (kbd "C-M-\\") 'toggle-input-method)
-  (global-set-key (kbd "<f9>") 'recompile)
-#+END_SRC
-* Enabled commands
-#+BEGIN_SRC emacs-lisp :tangle yes
-(put 'set-goal-column 'disabled nil)
-#+END_SRC
-* GUI
-#+BEGIN_SRC emacs-lisp :tangle yes
-(tool-bar-mode -1)
-(scroll-bar-mode -1)
-(setq inhibit-startup-screen t)
-(add-to-list 'default-frame-alist
-	     '(font . "inconsolata-12"))
-(setq resize-mini-windows t)
-#+END_SRC
 * Package
 #+BEGIN_SRC emacs-lisp :tangle yes
 (require 'package)
@@ -51,9 +5,97 @@
 	     '("melpa" . "https://melpa.org/packages/"))
 (package-initialize)
 #+END_SRC
-* Dired
+* Defuns
 #+BEGIN_SRC emacs-lisp :tangle yes
-(setq dired-listing-switches "-lh")
+;; Frequent ssh connections
+(defun lps ()
+  (interactive "")
+  (find-file "/ssh:lps:"))
+(defun lxplus ()
+  (interactive "")
+  (find-file "/ssh:lxplus:"))
+(defun lxplus6 ()
+  (interactive "")
+  (find-file "/ssh:lxplus6:"))
+(defun beluga ()
+  (interactive "")
+  (find-file "/ssh:beluga:"))
+(defun find-init.org ()
+  (interactive "")
+  (find-file "~/.emacs.d/init.org"))
+;; https://www.emacswiki.org/emacs/UnfillParagraph
+;; Stefan Monnier <foo at acm.org>. It is the opposite of fill-paragraph    
+(defun unfill-paragraph (&optional region)
+  "Takes a multi-line paragraph and makes it into a single line of text."
+  (interactive (progn (barf-if-buffer-read-only) '(t)))
+  (let ((fill-column (point-max))
+	;; This would override `fill-column' if it's an integer.
+	(emacs-lisp-docstring-fill-column t))
+    (fill-paragraph nil region)))
+
+;; Command for prefixed invokation of 'shell'
+(defun C-u_M-x_shell ()
+  (interactive "")
+  (let ((ido-mode-p ido-mode))
+    (if ido-mode-p 
+	(ido-mode -1))
+    (let ((current-prefix-arg '(4)))
+      (call-interactively #'shell))
+    (if ido-mode-p
+	(ido-mode t))))
+
+(defun set-C-c (key cmd)
+  (global-set-key (kbd (concat "C-c " key)
+		       cmd)))
+
+
+(defun split-select ()
+  (interactive "")
+  (select-window (split-window-right)))
+
+(defun copy-buffer-name ()
+  (interactive)
+  (let ((path (buffer-file-name)))
+    (if path (kill-new path))
+    (message "%s" path)))
+#+END_SRC
+* Key bindings
+#+BEGIN_SRC emacs-lisp :tangle yes
+(defun C-c-commands (cmd-alist)
+  (dolist (pair cmd-alist)
+    (global-set-key (kbd (concat "C-c " (car pair)))
+		    (cdr pair))))
+(C-c-commands
+ '(("3" . split-select)
+   ("a" . org-agenda)
+   ("b" . menu-bar-mode)
+   ("c" . org-capture)
+   ("d" . dired-other-window)
+   ("g" . magit-status)
+   ("i" . find-init.org)
+   ("l" . org-store-link)
+   ("m" . man)
+   ("p" . copy-buffer-name)
+   ("q" . unfill-paragraph)
+   ("r" . replace-string)
+   ("s" . C-u_M-x_shell)
+   ("t" .  load-theme)))
+#+END_SRC
+* Style
+#+BEGIN_SRC emacs-lisp :tangle yes
+(setq solarized-use-variable-pitch nil)
+(setq solarized-scale-org-headlines nil)
+(load-theme 'solarized-light t)
+(add-to-list 'default-frame-alist
+	     '(font . "inconsolata-12"))
+(add-hook 'focus-in-hook
+	  (lambda () 
+	    (set-fontset-font "fontset-default" 'unicode (font-spec :size 13 :name "Source Code Pro"))))
+(tool-bar-mode -1)
+(menu-bar-mode -1)
+(scroll-bar-mode -1)
+(setq inhibit-startup-screen t)
+(setq resize-mini-windows t)
 #+END_SRC
 * Programming
 ** Common
@@ -61,139 +103,215 @@
 (setq common-programming-hook
       (lambda ()
 	(setq show-trailing-whitespace t)
-        (setq indicate-buffer-boundaries 'right)
-	(linum-mode)
-	(column-number-mode)))
+	(setq display-line-numbers t)
+	(column-number-mode)
+	(show-paren-mode)))
 #+END_SRC
 ** Python
 #+BEGIN_SRC emacs-lisp :tangle yes
-  (add-hook 'python-mode-hook common-programming-hook)
-  (setq python-shell-interpreter "python2")
-  (setq python-check-command "pylint2")
-#+END_SRC
-*** Syntax highlight
-#+BEGIN_SRC emacs-lisp :tangle yes
-;; https://emacs.stackexchange.com/questions/2957/how-to-customize-syntax-highlight-for-just-a-given-mode/2968
-(make-variable-buffer-local 'font-lock-comment-face)
-(copy-face 'font-lock-comment-face 'python-comment-face)
-(set-face-foreground 'python-comment-face "gray")
-
-(make-variable-buffer-local 'font-lock-string-face)
-(copy-face 'font-lock-string-face 'python-string-face)
-(set-face-foreground 'python-string-face "dimgray")
-
-(make-variable-buffer-local 'font-lock-keyword-face)
-(copy-face 'font-lock-keyword-face 'python-keyword-face)
-(set-face-foreground 'python-keyword-face "black")
-(set-face-bold 'python-keyword-face t)
-
-(make-variable-buffer-local 'font-lock-builtin-face)
-(copy-face 'font-lock-builtin-face 'python-builtin-face)
-(set-face-foreground 'python-builtin-face "black")
-
-(make-variable-buffer-local 'font-lock-function-name-face)
-(copy-face 'font-lock-function-name-face 'python-function-name-face)
-(set-face-foreground 'python-function-name-face "black")
-(set-face-underline 'python-function-name-face t)
-
-(make-variable-buffer-local 'font-lock-variable-name-face)
-(copy-face 'font-lock-variable-name-face 'python-variable-name-face)
-(set-face-foreground 'python-variable-name-face "black")
-
-(make-variable-buffer-local 'font-lock-type-face)
-(copy-face 'font-lock-type-face 'python-type-face)
-(set-face-foreground 'python-type-face "black")
-
-(make-variable-buffer-local 'font-lock-constant-face)
-(copy-face 'font-lock-constant-face 'python-constant-face)
-(set-face-foreground 'python-constant-face "black")
-
-
-(add-hook 'python-mode-hook
-	  (lambda ()
-	    (setq font-lock-comment-face 'python-comment-face)
-	    (setq font-lock-string-face 'python-string-face)
-	    (setq font-lock-doc-face 'python-string-face)
-	    (setq font-lock-keyword-face 'python-keyword-face)
-	    (setq font-lock-builtin-face 'python-builtin-face)
-	    (setq font-lock-function-name-face 'python-function-name-face)
-	    (setq font-lock-constant-face 'python-constant-face)
-	    (setq font-lock-type-face 'python-type-face)
-	    (setq font-lock-variable-name-face 'python-variable-name-face)))
+(add-hook 'python-mode-hook common-programming-hook)
+(setq python-shell-interpreter "python2")
+(setq python-check-command "lintpy")
 #+END_SRC
 ** C++
-#+BEGIN_SRC emacs-lisp :tangle ye
-  (add-hook 'c++-mode-hook common-programming-hook)
-  (setq c-default-style '((c++-mode . "stroustrup")
-                          (other . "linux")))
-#+END_SRC
-* Docview
 #+BEGIN_SRC emacs-lisp :tangle yes
-(setq doc-view-resolution 300) ; default is 100
+(add-hook 'c-mode-hook common-programming-hook)
+(add-hook 'c++-mode-hook common-programming-hook)
+(setq c-default-style '((c++-mode . "stroustrup")
+			(other . "linux")))
+(setq c-basic-offset 8)
 #+END_SRC
-* Shell
+** elisp
 #+BEGIN_SRC emacs-lisp :tangle yes
-(setq comint-input-ignoredups t)
+(add-hook 'emacs-lisp-mode-hook common-programming-hook)
+#+END_SRC
+** mit-scheme
+#+BEGIN_SRC emacs-lispc :tangle yes
+(print "foo")
+(autoload 'scheme-mode "cmuscheme" "Major mode for Scheme." t)
+(autoload 'run-scheme "cmuscheme" "Switch to interactive Scheme buffer." t)
+(add-hook 'scheme-mode-hook 'turn-on-font-lock)
+(add-hook 'scheme-mode-hook common-programming-hook)
+(print "bar")
 #+END_SRC
 * Org
-** Markup/Export
 #+BEGIN_SRC emacs-lisp :tangle yes
+
+(setq org-agenda-files '("~/org/todo.org"))
+(setq org-default-notes-file "~/org/notes.org")
+(setq org-agenda-ndays 7)
+(setq org-deadline-warning-days 14)
+(setq org-agenda-show-all-dates t)
+(setq org-agenda-skip-deadline-if-done t)
+(setq org-agenda-skip-scheduled-if-done t)
+(setq org-agenda-start-on-weekday 1) ;; start on monday
+(setq org-id-link-to-org-use-id 'create-if-interactive)
+(setq org-capture-templates
+      '(("t" "Todo" entry (file+headline "~/org/todo.org" "INBOX")
+	 "* TODO %?\n")
+	("n" "Note" entry (file+datetree "~/org/notes.org")
+	 "* %?\n")
+	("e" "Emacs" entry (file+headline "~/org/emacs.org" "todo")
+	 "* TODO %?\n")))
+
+
+(setq org-todo-keywords '((sequence "TODO(t)"           ; ready to be started
+				    "STARTED(s)"        ; in progress
+				    "WAITING(w)"        ; waiting for completion
+				    "BLOCKED(b)"        ; blocked by other task / external dependancy
+				    "|"
+				    "DONE(d)"           ; finished
+				    "DELEGATED(l)"      ; deletaged
+				    "SOMEDAY(o)"        ; possibly in future
+				    "CANCELLED(c)")))   ; not gonna do it
+
+(setq org-todo-keyword-faces
+      '(("STARTED" . (:foreground "blue" :weight bold))
+	("BLOCKED" . (:foreground "white" :background "red"))))
+
+(add-hook 'org-agenda-mode-hook
+          (lambda () (hl-line-mode)))
+
 (require 'ox)
-(add-hook 'org-mode-hook 'turn-on-org-cdlatex)
 (setq org-export-copy-to-kill-ring nil)
-(setq org-export-in-background t)
-#+END_SRC
-** Divers
-#+BEGIN_SRC emacs-lisp :tangle yes
-  (global-set-key "\C-cl" 'org-store-link)
-  (global-set-key "\C-cc" 'org-capture)
-  (global-set-key "\C-ca" 'org-agenda)
-  (global-set-key "\C-cb" 'org-iswitchb)
-  (setq org-agenda-files '("~/org/todo.org"))
-  (setq org-default-notes-file "~/org/notes.org")
-  (setq org-todo-keywords '((sequence "TODO(t)"
-                                      "STARTED(s)"
-                                      "WAITING(w@)"
-                                      "|"
-                                      "DONE(d!)"
-                                      "SOMEDAY(o)"
-                                      "CANCELLED(c)")))
-  (setq org-todo-keyword-faces
-        '(("STARTED" . (:foreground "blue" :weight bold))))
 
-  (setq org-capture-templates
-        '(("t" "Todo" entry (file+headline "~/org/todo.org" "Tasks")
-               "* TODO %?\n%U\n%i")
-          ("n" "Note" entry (file+datetree "~/org/notes.org")
-           "* %?\n%i")
-          ("a" "Article" entry (file+headline "~/org/lectures.org" "À lire")
-           "* %?\n%U%i"
-          )))
-
-  (setq org-agenda-skip-scheduled-if-done t)
-
-  (add-hook 'org-agenda-mode-hook
-            (lambda () (hl-line-mode)))
-
-  (defun kanban-agenda (key category)
-    `(,(concat "k" key) ,category
-      ((todo "SOMEDAY")
-       (todo "TODO")
-       (todo "STARTED|WAITING")
-       (todo "DONE"))
-      ((org-agenda-category-filter-preset '(,(concat "+" category))))))
-
-  (setq org-agenda-custom-commands
-        `(("k" . "kanban")
-          ,(kanban-agenda "d" "Deep SUSY")
-          ,(kanban-agenda "i" "IFT6266")
-          ,(kanban-agenda "c" "CTIDE PUB Note")))
-
-#+END_SRC
-   
-** Babel
-#+BEGIN_SRC emacs-lisp :tangle yes
 (require 'ob-python)
 (setq org-src-preserve-indentation t)
 (setq org-src-fontify-natively t)
+
+(require 'orgit)
+;; overriding the function from orgit
+(defun orgit-log-store ()
+  "Store a link to a Magit-Log mode buffer.
+When the region selects one or more commits, then do nothing.
+In that case `orgit-rev-store' stores one or more links instead."
+  (when (and (eq major-mode 'magit-log-mode)
+             (not (magit-region-sections 'commit)))
+    (let ((repo (abbreviate-file-name default-directory)))
+      (if orgit-log-save-arguments
+          (let ((args (if (car (last magit-refresh-args))
+                          magit-refresh-args
+                        (butlast magit-refresh-args))))
+            (org-store-link-props
+             :type        "orgit-log"
+             :link        (format "orgit-log:%s::%S" repo args)
+             :description (format "%s %S" repo (cons 'magit-log args))))
+        (let ((commit-id (magit-commit-at-point)))
+          (org-store-link-props
+           :type        "orgit-log"
+           :link        (format "orgit-rev:%s::%s" repo commit-id)
+	   :description (format "%s::%s \"%s\""
+				repo
+				commit-id
+				(magit-rev-format "%s" commit-id))))))))
+
+(setq org-indirect-buffer-display 'current-window)
+
+(org-babel-do-load-languages
+ 'org-babel-load-languages
+ '((emacs-lisp . t)
+   (shell . t)))
+#+END_SRC   
+* Bridge
+#+BEGIN_SRC emacs-lisp :tangle yes
+
+(defun notify-me (process event)
+  (message "foo")
+  (start-process-shell-command "notify" "*notify*"
+    (format "notify-send -u normal \"%s\" \"%s\"" process event)))
+
+(defmacro make-bridge (name src dest)
+  `(defun ,name ()
+     (interactive "")
+     (with-current-buffer (get-buffer "*scratch*")
+       (set-process-sentinel
+	(start-process-shell-command "rsync" "*rsync*" ,(concat "rsync -a " src " " dest))
+	'notify-me))))
+
+(make-bridge bridge-HistFitter
+	     "/home/glg/code/git/HistFitter/"
+	     "lps:work/code/HistFitter")
+(global-set-key (kbd "<f9>") 'bridge-HistFitter)
+
+(make-bridge bridge-MBJ_HistFitter
+	     "/home/glg/code/git/MultiBJets/MBJ_HistFitter/"
+	     "lps:work/code/MBJ_HistFitter")
+(global-set-key (kbd "<f11>") 'bridge-MBJ_HistFitter)
+
+(make-bridge bridge-MBJ
+	     "/home/glg/code/git/MultiBJets/MBJ_Analysis/"
+	     "lps:/lcg/storage15/atlas/gagnon/code/MBJ_Analysis")
+(global-set-key (kbd "<f10>") 'bridge-MBJ)
+
+(make-bridge bridge-MBJ_NN
+	     "/home/glg/code/git/MBJ_NN/"
+	     "lps:/lcg/storage15/atlas/gagnon/code/MBJ_NN")
+(global-set-key (kbd "<f12>") 'bridge-MBJ_NN)
+
+
+#+END_SRC
+* LaTeX
+#+BEGIN_SRC emacs-lisp :tangle yes
+(setq TeX-auto-save t)
+(setq TeX-parse-self t)
+(setq-default TeX-master nil)
+(setq TeX-electric-math (cons "$" "$"))
+(setq blink-matching-paren nil)
+(setq LaTeX-electric-left-right-brace t)
+(setq TeX-electric-sub-and-superscript t)
+;(setq TeX-electric-escape t)
+(customize-set-variable 'LaTeX-math-abbrev-prefix (kbd "é"))
+(add-hook 'LaTeX-mode-hook 'LaTeX-math-mode)
+(add-hook 'LaTeX-mode-hook 'flyspell-mode)
+
+(defun tex-line-break ()
+  (interactive "")
+  (insert "\\\\"))
+
+(add-hook 'LaTeX-mode-hook
+	  (lambda ()
+	    (local-set-key (kbd "C-c C-<") 'TeX-error-overview)
+	    (local-set-key (kbd "C-<return>") 'tex-line-break)))
+
+(require 'reftex)
+(add-hook 'LaTeX-mode-hook 'turn-on-reftex)
+(setq reftex-plug-into-AUCTeX t)
+
+#+END_SRC
+* Divers
+#+BEGIN_SRC emacs-lisp :tangle yes
+(show-paren-mode t)
+(delete-selection-mode)
+(setq make-backup-files t)
+(setq version-control t)
+(setq delete-old-versions t)
+(setq kept-new-versions 3)
+(setq kept-old-versions 0)
+(add-to-list 'backup-directory-alist '("." . "/home/glg/.emacs.d/backup"))
+(setq dired-listing-switches "-lh")
+(setq find-function-C-source-directory "/home/glg/code/src/emacs-26.2/src")
+(setq doc-view-resolution 300) ; default is 100
+(setq comint-input-ignoredups t)
+(setq comint-password-prompt-regexp
+      (concat comint-password-prompt-regexp "\\|pass phrase"))
+(setq search-default-mode t) ;; sets regexp search
+(size-indication-mode)
+(setq highlight-nonselected-windows t)
+;; (setq isearch-resume-in-command-history t)
+(add-hook 'compilation-minor-mode-hook
+	  (lambda () (hl-line-mode)))
+(setq ring-bell-function
+      (lambda ()
+	(invert-face 'mode-line)
+	(run-with-timer 0.1 nil 'invert-face 'mode-line)))
+(setq async-shell-command-display-buffer nil)
+(setq mouse-drag-and-drop-region 'shift)
+(setq confirm-kill-processes nil)
+(pdf-tools-install)
+(add-hook 'pdf-view-mode-hook (lambda () (auto-revert-mode)))
+(remove-hook 'find-file-hook 'vc-find-file-hook)
+(setq vc-handled-backends '())
+(setq custom-file "~/.emacs.d/custom.el")
+(load custom-file)
+(put 'set-goal-column 'disabled nil)
 #+END_SRC
