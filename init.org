@@ -79,7 +79,8 @@
    ("q" . unfill-paragraph)
    ("r" . replace-string)
    ("s" . C-u_M-x_shell)
-   ("t" .  load-theme)))
+   ("t" . load-theme)
+   ("u" . rename-uniquely)))
 #+END_SRC
 * Style
 #+BEGIN_SRC emacs-lisp :tangle yes
