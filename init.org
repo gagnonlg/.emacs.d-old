@@ -89,6 +89,7 @@
    ("b" . menu-bar-mode)
    ("c" . org-capture)
    ("d" . dired-other-window)
+   ("f" . swiper)
    ("g" . magit-status)
    ("i" . find-init.org)
    ("l" . org-store-link)
