@@ -165,7 +165,7 @@
 (setq org-agenda-show-all-dates t)
 (setq org-agenda-skip-deadline-if-done t)
 (setq org-agenda-skip-scheduled-if-done t)
-(setq org-agenda-start-on-weekday 1) ;; start on monday
+(setq org-agenda-start-on-weekday nil) ;; start on today
 (setq org-id-link-to-org-use-id 'create-if-interactive)
 (setq org-capture-templates
       '(("t" "Todo" entry (file+headline "~/org/todo.org" "INBOX")
