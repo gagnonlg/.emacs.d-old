@@ -309,6 +309,12 @@ In that case `orgit-rev-store' stores one or more links instead."
         "https://www.theguardian.com/world/europe-news/rss"
 ))
 #+END_SRC
+* EMMS
+#+BEGIN_SRC emacs-lisp :tangle yes
+(require 'emms-setup)
+(emms-all)
+(emms-default-players)
+(setq emms-source-file-default-directory "~/Music/")
 #+END_SRC
 * Divers
 #+BEGIN_SRC emacs-lisp :tangle yes
