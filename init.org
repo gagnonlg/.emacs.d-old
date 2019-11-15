@@ -299,6 +299,17 @@ In that case `orgit-rev-store' stores one or more links instead."
 (setq reftex-plug-into-AUCTeX t)
 
 #+END_SRC
+* News
+#+BEGIN_SRC emacs-lisp :tangle yes
+(setq elfeed-feeds
+      '("http://nullprogram.com/feed/"
+        "https://www.ledevoir.com/rss/manchettes.xml"
+        ;; "https://rss.nytimes.com/services/xml/rss/nyt/US.xml"
+        "https://www.monde-diplomatique.fr/rss"
+        "https://www.theguardian.com/world/europe-news/rss"
+))
+#+END_SRC
+#+END_SRC
 * Divers
 #+BEGIN_SRC emacs-lisp :tangle yes
 (show-paren-mode t)
@@ -335,14 +346,4 @@ In that case `orgit-rev-store' stores one or more links instead."
 (setq custom-file "~/.emacs.d/custom.el")
 (load custom-file)
 (put 'set-goal-column 'disabled nil)
-#+END_SRC
-* News
-#+BEGIN_SRC emacs-lisp :tangle yes
-(setq elfeed-feeds
-      '("http://nullprogram.com/feed/"
-        "https://www.ledevoir.com/rss/manchettes.xml"
-        "https://rss.nytimes.com/services/xml/rss/nyt/US.xml"
-        "https://www.monde-diplomatique.fr/rss"
-        "https://www.theguardian.com/world/europe-news/rss"
-))
 #+END_SRC
