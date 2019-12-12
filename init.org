@@ -53,12 +53,23 @@
   (interactive "")
   (select-window (split-window-right)))
 
-(defun copy-buffer-name ()
-  (interactive)
-  (let ((path (buffer-file-name)))
-    (if path (kill-new path))
-    (message "%s" path)))
+(defun dired-path-at-point ()
+  "Return the path at point or the directory path if point not on a path"
+  (let* ((moved (dired-move-to-filename)))
+    (expand-file-name
+     (if moved
+	 (buffer-substring-no-properties moved (line-end-position))
+       default-directory))))
 
+(defun copy-path ()
+  "Copy full path name
+If in dired-mode, attempt to copy path of file at point"
+  (interactive)
+  (let ((path (if (equal major-mode 'dired-mode)
+		 (dired-path-at-point)
+	       (buffer-file-name))))
+    (if path (message "%s" (kill-new path))
+      (error "No path at point"))))
 
 ;; The following 2 defuns are from
 ;; https://www.emacswiki.org/emacs/DuplicateLines
@@ -95,7 +106,7 @@
    ("i" . find-init.org)
    ("l" . org-store-link)
    ("m" . man)
-   ("p" . copy-buffer-name)
+   ("p" . copy-path)
    ("q" . unfill-paragraph)
    ("r" . replace-string)
    ("s" . C-u_M-x_shell)
