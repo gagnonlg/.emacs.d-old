@@ -330,41 +330,6 @@ In that case `orgit-rev-store' stores one or more links instead."
 (emms-default-players)
 (setq emms-source-file-default-directory "~/Music/")
 #+END_SRC
-* Emails
-#+BEGIN_SRC emacs-lisp :tangle yes
-(require 'mu4e)
-(setq mail-user-agent 'mu4e-user-agent)
-(setq mu4e-maildir "~/Mail/protonmail")
-(setq mu4e-sent-folder   "/Sent")
-(setq mu4e-trash-folder  "/Trash")
-
-(setq
-message-send-mail-function   'smtpmail-send-it
-smtpmail-default-smtp-server "127.0.0.1"
-smtpmail-smtp-server         "127.0.0.1"
-smtpmail-smtp-service 1025)
-
-
-
-
-(setq mu4e-get-mail-command "offlineimap")
-(setq
- user-mail-address "gagnonlg@protonmail.ch"
- user-full-name  "Louis-Guillaume Gagnon"
- mu4e-compose-signature "L-G")
-(setq message-kill-buffer-on-exit t)
-(setq mu4e-headers-skip-duplicates t)
-(setq mail-user-agent 'mu4e-user-agent)
-(setq mu4e-update-interval (* 5 60))
-(setq mu4e-compose-dont-reply-to-self t)
-(setq mu4e-user-mail-address-list '("gagnonlg@protonmail.ch"))
-(setq mu4e-view-show-addresses t)
-
-(setq message-send-mail-function 'smtpmail-send-it)
-(setq smtpmail-smtp-server "127.0.0.1")
-
-
-#+END_SRC
 * Divers
 #+BEGIN_SRC emacs-lisp :tangle yes
 (show-paren-mode t)
