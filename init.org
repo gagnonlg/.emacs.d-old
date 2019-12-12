@@ -142,6 +142,19 @@
 (setq c-default-style '((c++-mode . "stroustrup")
 			(other . "linux")))
 (setq c-basic-offset 8)
+
+;; https://twiki.cern.ch/twiki/bin/view/AtlasComputing/UsingEmacs
+(setq cc-other-file-alist
+  '(("\\.cxx$" (".h"))
+    ("\\.cpp$" (".h"))
+    ("\\.h$" (".cxx" ".cpp"))))
+(setq cc-search-directories '("." "../*" "../*/*"))
+
+(setq my-cc-mode-hook
+      (lambda ()
+	(local-set-key (kbd "C-c C-v") 'ff-find-other-file)))
+(add-hook 'c++-mode-hook my-cc-mode-hook)
+
 #+END_SRC
 ** elisp
 #+BEGIN_SRC emacs-lisp :tangle yes
