@@ -388,10 +388,4 @@ smtpmail-smtp-service 1025)
 (setq custom-file "~/.emacs.d/custom.el")
 (load custom-file)
 (put 'set-goal-column 'disabled nil)
-
-(require 'symon)
-(setq symon-delay 2)
-(add-to-list 'symon-monitors 'symon-linux-battery-monitor)
-(add-to-list 'symon-monitors 'symon-current-time-monitor)
-(symon-mode)
 #+END_SRC
