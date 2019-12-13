@@ -55,7 +55,7 @@
 
 (defun dired-path-at-point ()
   "Return the path at point or the directory path if point not on a path"
-  (let* ((moved (dired-move-to-filename)))
+  (let ((moved (dired-move-to-filename)))
     (expand-file-name
      (if moved
 	 (buffer-substring-no-properties moved (line-end-position))
