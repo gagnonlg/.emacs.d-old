@@ -171,15 +171,6 @@ If in dired-mode, attempt to copy path of file at point"
 #+BEGIN_SRC emacs-lisp :tangle yes
 (add-hook 'emacs-lisp-mode-hook common-programming-hook)
 #+END_SRC
-** mit-scheme
-#+BEGIN_SRC emacs-lispc :tangle yes
-(print "foo")
-(autoload 'scheme-mode "cmuscheme" "Major mode for Scheme." t)
-(autoload 'run-scheme "cmuscheme" "Switch to interactive Scheme buffer." t)
-(add-hook 'scheme-mode-hook 'turn-on-font-lock)
-(add-hook 'scheme-mode-hook common-programming-hook)
-(print "bar")
-#+END_SRC
 * Org
 #+BEGIN_SRC emacs-lisp :tangle yes
 
