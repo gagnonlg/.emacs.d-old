@@ -142,6 +142,8 @@ If in dired-mode, attempt to copy path of file at point"
   (dolist (pair cmd-alist)
     (global-set-key (kbd (concat "C-c " (car pair)))
 		    (cdr pair))))
+
+;; WARNING: now set other C-c command in use-package forms
 (C-c-commands
  '(("3" . split-select)
    ("a" . org-agenda)
