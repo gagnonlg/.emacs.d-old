@@ -16,6 +16,11 @@
 (use-package yaml-mode)
 
 ;; Packages with configurations
+(use-package elfeed
+  :config
+  (global-set-key (kbd "C-c w") 'elfeed)
+  (setq elfeed-feeds '("http://nullprogram.com/feed/")))
+
 (use-package magit
   :config
   (global-set-key (kbd "C-c g") 'magit-status)
@@ -153,8 +158,7 @@ If in dired-mode, attempt to copy path of file at point"
    ("r" . replace-string)
    ("s" . C-u_M-x_shell)
    ("t" . load-theme)
-   ("u" . rename-uniquely)
-   ("w" . elfeed)))
+   ("u" . rename-uniquely)))
 #+END_SRC
 * Style
 #+BEGIN_SRC emacs-lisp :tangle yes
@@ -330,16 +334,6 @@ If in dired-mode, attempt to copy path of file at point"
 (add-hook 'LaTeX-mode-hook 'turn-on-reftex)
 (setq reftex-plug-into-AUCTeX t)
 
-#+END_SRC
-* News
-#+BEGIN_SRC emacs-lisp :tangle yes
-(setq elfeed-feeds
-      '("http://nullprogram.com/feed/"
-        "https://www.ledevoir.com/rss/manchettes.xml"
-        ;; "https://rss.nytimes.com/services/xml/rss/nyt/US.xml"
-        "https://www.monde-diplomatique.fr/rss"
-        "https://www.theguardian.com/world/europe-news/rss"
-))
 #+END_SRC
 * EMMS
 #+BEGIN_SRC emacs-lisp :tangle yes
