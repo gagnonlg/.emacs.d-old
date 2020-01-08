@@ -21,6 +21,10 @@
   (global-set-key (kbd "C-c w") 'elfeed)
   (setq elfeed-feeds '("http://nullprogram.com/feed/")))
 
+(use-package ivy
+  :config
+  (global-set-key (kbd "C-c f") 'swiper))
+
 (use-package magit
   :config
   (global-set-key (kbd "C-c g") 'magit-status)
@@ -150,7 +154,6 @@ If in dired-mode, attempt to copy path of file at point"
    ("b" . menu-bar-mode)
    ("c" . org-capture)
    ("d" . dired-other-window)
-   ("f" . swiper)
    ("i" . find-init.org)
    ("l" . org-store-link)
    ("m" . man)
