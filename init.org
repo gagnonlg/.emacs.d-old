@@ -150,7 +150,6 @@ If in dired-mode, attempt to copy path of file at point"
    ("b" . menu-bar-mode)
    ("c" . org-capture)
    ("d" . dired-other-window)
-   ("e" . mu4e)
    ("f" . swiper)
    ("i" . find-init.org)
    ("l" . org-store-link)
