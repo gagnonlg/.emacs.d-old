@@ -4,8 +4,18 @@
 (add-to-list 'package-archives
 	     '("melpa" . "https://melpa.org/packages/"))
 (package-initialize)
-
 (require 'use-package)
+
+;; Packages with no configuration
+(use-package cmake-mode)
+(use-package csv-mode)
+(use-package lua-mode)
+(use-package markdown-mode)
+(use-package pkgbuild-mode)
+(use-package vlf)
+(use-package yaml-mode)
+
+;; Packages with configurations
 (use-package magit
   :config
   (global-set-key (kbd "C-c g") 'magit-status)
