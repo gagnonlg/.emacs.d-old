@@ -1,9 +1,42 @@
-* Package
+* Packages
 #+BEGIN_SRC emacs-lisp :tangle yes
 (require 'package)
 (add-to-list 'package-archives
 	     '("melpa" . "https://melpa.org/packages/"))
 (package-initialize)
+
+(require 'use-package)
+(use-package magit
+  :config
+  (global-set-key (kbd "C-c g") 'magit-status)
+  (use-package orgit
+    :config
+    (defun orgit-log-store ()
+      "Store a link to a Magit-Log mode buffer.
+When the region selects one or more commits, then do nothing.
+In that case `orgit-rev-store' stores one or more links instead."
+      (when (and (eq major-mode 'magit-log-mode)
+		 (not (magit-region-sections 'commit)))
+	(let ((repo (abbreviate-file-name default-directory)))
+	  (if orgit-log-save-arguments
+	      (let ((args (if (car (last magit-refresh-args))
+			      magit-refresh-args
+			    (butlast magit-refresh-args))))
+		(org-store-link-props
+		 :type        "orgit-log"
+		 :link        (format "orgit-log:%s::%S" repo args)
+		 :description (format "%s %S" repo (cons 'magit-log args))))
+	    (let ((commit-id (magit-commit-at-point)))
+	      (org-store-link-props
+	       :type        "orgit-log"
+	       :link        (format "orgit-rev:%s::%s" repo commit-id)
+	       :description (format "%s::%s \"%s\""
+				    repo
+				    commit-id
+				    (magit-rev-format "%s" commit-id))))))))
+    (global-set-key (kbd "C-c l") 'org-store-link)))
+
+
 #+END_SRC
 * Defuns
 #+BEGIN_SRC emacs-lisp :tangle yes
@@ -102,7 +135,6 @@ If in dired-mode, attempt to copy path of file at point"
    ("d" . dired-other-window)
    ("e" . mu4e)
    ("f" . swiper)
-   ("g" . magit-status)
    ("i" . find-init.org)
    ("l" . org-store-link)
    ("m" . man)
@@ -215,32 +247,6 @@ If in dired-mode, attempt to copy path of file at point"
 (require 'ob-python)
 (setq org-src-preserve-indentation t)
 (setq org-src-fontify-natively t)
-
-(require 'orgit)
-;; overriding the function from orgit
-(defun orgit-log-store ()
-  "Store a link to a Magit-Log mode buffer.
-When the region selects one or more commits, then do nothing.
-In that case `orgit-rev-store' stores one or more links instead."
-  (when (and (eq major-mode 'magit-log-mode)
-             (not (magit-region-sections 'commit)))
-    (let ((repo (abbreviate-file-name default-directory)))
-      (if orgit-log-save-arguments
-          (let ((args (if (car (last magit-refresh-args))
-                          magit-refresh-args
-                        (butlast magit-refresh-args))))
-            (org-store-link-props
-             :type        "orgit-log"
-             :link        (format "orgit-log:%s::%S" repo args)
-             :description (format "%s %S" repo (cons 'magit-log args))))
-        (let ((commit-id (magit-commit-at-point)))
-          (org-store-link-props
-           :type        "orgit-log"
-           :link        (format "orgit-rev:%s::%s" repo commit-id)
-	   :description (format "%s::%s \"%s\""
-				repo
-				commit-id
-				(magit-rev-format "%s" commit-id))))))))
 
 (setq org-indirect-buffer-display 'current-window)
 
