@@ -55,6 +55,11 @@ In that case `orgit-rev-store' stores one or more links instead."
 				    (magit-rev-format "%s" commit-id))))))))
     (global-set-key (kbd "C-c l") 'org-store-link)))
 
+(use-package pdf-tools
+  :config
+  (pdf-tools-install)
+  (add-hook 'pdf-view-mode-hook (lambda () (auto-revert-mode))))
+
 
 #+END_SRC
 * Defuns
@@ -166,14 +171,16 @@ If in dired-mode, attempt to copy path of file at point"
 #+END_SRC
 * Style
 #+BEGIN_SRC emacs-lisp :tangle yes
-(setq solarized-use-variable-pitch nil)
-(setq solarized-scale-org-headlines nil)
-(load-theme 'solarized-light t)
-(add-to-list 'default-frame-alist
-	     '(font . "inconsolata-12"))
-(add-hook 'focus-in-hook
-	  (lambda () 
-	    (set-fontset-font "fontset-default" 'unicode (font-spec :size 13 :name "Source Code Pro"))))
+(use-package solarized-theme
+  :config
+  (setq solarized-use-variable-pitch nil)
+  (setq solarized-scale-org-headlines nil)
+  (load-theme 'solarized-light t)
+  (add-to-list 'default-frame-alist
+  	       '(font . "inconsolata-12"))
+  (add-hook 'focus-in-hook
+  	    (lambda () 
+	      (set-fontset-font "fontset-default" 'unicode (font-spec :size 13 :name "Source Code Pro")))))
 (tool-bar-mode -1)
 (menu-bar-mode -1)
 (scroll-bar-mode -1)
@@ -317,27 +324,24 @@ If in dired-mode, attempt to copy path of file at point"
 (setq TeX-parse-self t)
 (setq-default TeX-master nil)
 (setq TeX-electric-math (cons "$" "$"))
-(setq blink-matching-paren nil)
 (setq LaTeX-electric-left-right-brace t)
 (setq TeX-electric-sub-and-superscript t)
-;(setq TeX-electric-escape t)
+(setq blink-matching-paren nil)
 (customize-set-variable 'LaTeX-math-abbrev-prefix (kbd "é"))
 (add-hook 'LaTeX-mode-hook 'LaTeX-math-mode)
 (add-hook 'LaTeX-mode-hook 'flyspell-mode)
-
 (defun tex-line-break ()
   (interactive "")
   (insert "\\\\"))
-
 (add-hook 'LaTeX-mode-hook
-	  (lambda ()
-	    (local-set-key (kbd "C-c C-<") 'TeX-error-overview)
-	    (local-set-key (kbd "C-<return>") 'tex-line-break)))
-
+	    (lambda ()
+	      (local-set-key (kbd "C-c C-<") 'TeX-error-overview)
+	      (local-set-key (kbd "C-<return>") 'tex-line-break)))
 (require 'reftex)
 (add-hook 'LaTeX-mode-hook 'turn-on-reftex)
 (setq reftex-plug-into-AUCTeX t)
 
+(use-package cdlatex)
 #+END_SRC
 * Divers
 #+BEGIN_SRC emacs-lisp :tangle yes
@@ -368,8 +372,6 @@ If in dired-mode, attempt to copy path of file at point"
 (setq async-shell-command-display-buffer nil)
 (setq mouse-drag-and-drop-region 'shift)
 (setq confirm-kill-processes nil)
-(pdf-tools-install)
-(add-hook 'pdf-view-mode-hook (lambda () (auto-revert-mode)))
 (remove-hook 'find-file-hook 'vc-find-file-hook)
 (setq vc-handled-backends '())
 (setq custom-file "~/.emacs.d/custom.el")
