@@ -1,10 +1,50 @@
+* Planif
+** TODO flymake setup
+** TODO pdftools: don't prompt for recompiling
++ Or better: detect if not interactive and just pop a buffer with a
+  message or something?
+** TODO Better approach to bridges
++ Mechanism in its own package
++ Prompt mechanism for on the fly bridge definition
++ Facilicites for permanent bridges
+** TODO Document and fix the recent TRAMP ssh problems
+** TODO Better organization of init.org
++ Example groups:
+  + File-related modes (e.g. cmake, csv, lua...)
+** TODO Réessayer mu4e
++ Multi-account
++ Threaded display
++ Searchable
++ Simple to configure
+
++ Options:
+  + mu4e (et offlineimap)
+  + gnus 
+
++ Je préfère mu4e
+  + [X] Multi-account (contexts)
+
+  + [X] Threaded display
+
+  + [X] Searchable
+
+  + [ ] Simple to configure
+    + Mieux que GNUS, en tous cas.
+
+** TODO Helm? ido?
+** TODO Declare Bankcruptcy
+** TODO commande pour lancher batch jobs
+   + avec un buffer qui liste les "known jobs"
+   + transient buffer to select server and put together submission command
+   + Methodes: PBS, slurm, panda, etc
+** TODO dans compilation-mode, commande pour sauvegarder avec single-char key (s?)
 * Packages
 #+BEGIN_SRC emacs-lisp :tangle yes
 (require 'package)
 (add-to-list 'package-archives
 	     '("melpa" . "https://melpa.org/packages/"))
-(package-initialize)
-(require 'use-package)
+(when (< emacs-major-version 27)
+  (package-initialize))
 
 ;; Packages with no configuration
 (use-package cmake-mode)
@@ -16,48 +56,19 @@
 (use-package yaml-mode)
 
 ;; Packages with configurations
-(use-package elfeed
-  :config
-  (global-set-key (kbd "C-c w") 'elfeed)
-  (setq elfeed-feeds '("http://nullprogram.com/feed/")))
 
 (use-package ivy
   :config
-  (global-set-key (kbd "C-c f") 'swiper))
+  ;; (global-set-key (kbd "C-c f") 'swiper)
+  (ivy-mode t))
 
-(use-package magit
+(use-package swiper
   :config
-  (global-set-key (kbd "C-c g") 'magit-status)
-  (use-package orgit
-    :config
-    (defun orgit-log-store ()
-      "Store a link to a Magit-Log mode buffer.
-When the region selects one or more commits, then do nothing.
-In that case `orgit-rev-store' stores one or more links instead."
-      (when (and (eq major-mode 'magit-log-mode)
-		 (not (magit-region-sections 'commit)))
-	(let ((repo (abbreviate-file-name default-directory)))
-	  (if orgit-log-save-arguments
-	      (let ((args (if (car (last magit-refresh-args))
-			      magit-refresh-args
-			    (butlast magit-refresh-args))))
-		(org-store-link-props
-		 :type        "orgit-log"
-		 :link        (format "orgit-log:%s::%S" repo args)
-		 :description (format "%s %S" repo (cons 'magit-log args))))
-	    (let ((commit-id (magit-commit-at-point)))
-	      (org-store-link-props
-	       :type        "orgit-log"
-	       :link        (format "orgit-rev:%s::%s" repo commit-id)
-	       :description (format "%s::%s \"%s\""
-				    repo
-				    commit-id
-				    (magit-rev-format "%s" commit-id))))))))
-    (global-set-key (kbd "C-c l") 'org-store-link)))
+  (global-set-key (kbd "C-c f") 'swiper))
 
 (use-package pdf-tools
   :config
-  (pdf-tools-install)
+  (pdf-tools-install t t)
   (add-hook 'pdf-view-mode-hook (lambda () (auto-revert-mode))))
 
 
@@ -65,6 +76,9 @@ In that case `orgit-rev-store' stores one or more links instead."
 * Defuns
 #+BEGIN_SRC emacs-lisp :tangle yes
 ;; Frequent ssh connections
+(defun cori ()
+  (interactive "")
+  (find-file "/ssh:cori:"))
 (defun lps ()
   (interactive "")
   (find-file "/ssh:lps:"))
@@ -168,6 +182,9 @@ If in dired-mode, attempt to copy path of file at point"
    ("s" . C-u_M-x_shell)
    ("t" . load-theme)
    ("u" . rename-uniquely)))
+
+(global-set-key (kbd "C-x C-b") 'ibuffer)
+
 #+END_SRC
 * Style
 #+BEGIN_SRC emacs-lisp :tangle yes
@@ -177,10 +194,10 @@ If in dired-mode, attempt to copy path of file at point"
   (setq solarized-scale-org-headlines nil)
   (load-theme 'solarized-light t)
   (add-to-list 'default-frame-alist
-  	       '(font . "inconsolata-12"))
+	       '(font . "inconsolata-12"))
   (add-hook 'focus-in-hook
   	    (lambda () 
-	      (set-fontset-font "fontset-default" 'unicode (font-spec :size 13 :name "Source Code Pro")))))
+	    (set-fontset-font "fontset-default" 'unicode (font-spec :size 13 :name "Source Code Pro")))))
 (tool-bar-mode -1)
 (menu-bar-mode -1)
 (scroll-bar-mode -1)
@@ -190,6 +207,18 @@ If in dired-mode, attempt to copy path of file at point"
 * Programming
 ** Common
 #+BEGIN_SRC emacs-lisp :tangle yes
+;; only run the checks when file is loaded or saved
+(setq flymake-no-changes-timeout nil)
+(setq flymake-start-on-flymake-mode t)
+
+;; For now, disable shellcheck on PKGBUILD files (too many false
+;; positives)
+(defun flymake-ignore-PKGBUILD ()
+  (when (string= "PKGBUILD" (file-name-base (buffer-file-name)))
+    (flymake-mode -1)))
+(add-hook 'find-file-hook 'flymake-ignore-PKGBUILD)
+
+
 (setq common-programming-hook
       (lambda ()
 	(setq show-trailing-whitespace t)
@@ -202,6 +231,13 @@ If in dired-mode, attempt to copy path of file at point"
 (add-hook 'python-mode-hook common-programming-hook)
 (setq python-shell-interpreter "python2")
 (setq python-check-command "lintpy")
+
+(setq python-flymake-command '("pyflakes-python2")) ;; TODO configure this
+(setq my-python-mode-hook
+  (lambda () (flymake-mode)))
+(add-hook 'python-mode-hook my-python-mode-hook)
+
+
 #+END_SRC
 ** C++
 #+BEGIN_SRC emacs-lisp :tangle yes
@@ -227,6 +263,14 @@ If in dired-mode, attempt to copy path of file at point"
 ** elisp
 #+BEGIN_SRC emacs-lisp :tangle yes
 (add-hook 'emacs-lisp-mode-hook common-programming-hook)
+#+END_SRC
+** sh
+#+BEGIN_SRC emacs-lisp :tangle yes
+(add-hook 'sh-mode-hook common-programming-hook)
+(use-package flymake-shellcheck
+  :config
+  (add-hook 'sh-mode-hook 'flymake-shellcheck-load)
+  (add-hook 'sh-mode-hook 'flymake-mode))
 #+END_SRC
 * Org
 #+BEGIN_SRC emacs-lisp :tangle yes
@@ -280,6 +324,26 @@ If in dired-mode, attempt to copy path of file at point"
  '((emacs-lisp . t)
    (shell . t)))
 #+END_SRC   
+* Org-roam
+#+BEGIN_SRC emacs-lisp :tangle yes
+
+(use-package org-roam
+      :ensure t
+      :hook
+      (after-init . org-roam-mode)
+      :custom
+      (org-roam-directory "~/Wiki")
+      (org-roam-db-update-method 'immediate)
+      :bind (:map org-roam-mode-map
+              (("C-c n l" . org-roam)
+               ("C-c n f" . org-roam-find-file)
+               ("C-c n g" . org-roam-graph)
+	       ("C-c n t" . org-roam-tag-add))
+              :map org-mode-map
+              (("C-c n i" . org-roam-insert))
+              (("C-c n I" . org-roam-insert-immediate))))
+
+#+END_SRC
 * Bridge
 #+BEGIN_SRC emacs-lisp :tangle yes
 
@@ -343,6 +407,55 @@ If in dired-mode, attempt to copy path of file at point"
 
 (use-package cdlatex)
 #+END_SRC
+* Magit
+#+BEGIN_SRC emacs-lisp :tangle yes
+(use-package magit
+  :config
+  (global-set-key (kbd "C-c g") 'magit-status))
+
+(use-package orgit
+  :after magit
+  :config
+  (defun orgit-log-store ()
+    "Store a link to a Magit-Log mode buffer.
+When the region selects one or more commits, then do nothing.
+In that case `orgit-rev-store' stores one or more links instead."
+    (when (and (eq major-mode 'magit-log-mode)
+	       (not (magit-region-sections 'commit)))
+      (let ((repo (abbreviate-file-name default-directory)))
+	(if orgit-log-save-arguments
+	    (let ((args (if (car (last magit-refresh-args))
+			    magit-refresh-args
+			  (butlast magit-refresh-args))))
+	      (org-store-link-props
+	       :type        "orgit-log"
+	       :link        (format "orgit-log:%s::%S" repo args)
+	       :description (format "%s %S" repo (cons 'magit-log args))))
+	  (let ((commit-id (magit-commit-at-point)))
+	    (org-store-link-props
+	     :type        "orgit-log"
+	     :link        (format "orgit-rev:%s::%s" repo commit-id)
+	     :description (format "%s::%s \"%s\""
+				  repo
+				  commit-id
+				  (magit-rev-format "%s" commit-id))))))))
+  (global-set-key (kbd "C-c l") 'org-store-link))
+
+
+;; (use-package forge
+;;   :after magit)
+#+END_SRC
+
+* Elfeed
+#+BEGIN_SRC emacs-lisp :tangle yes
+(use-package elfeed
+  :config
+  (global-set-key (kbd "C-c w") 'elfeed)
+  (setq elfeed-feeds '("http://nullprogram.com/feed/"
+                       "https://thegradient.pub/rss/"
+                       "https://distill.pub/rss.xml"
+)))
+#+END_SRC
 * Divers
 #+BEGIN_SRC emacs-lisp :tangle yes
 (show-paren-mode t)
@@ -358,7 +471,7 @@ If in dired-mode, attempt to copy path of file at point"
 (setq doc-view-resolution 300) ; default is 100
 (setq comint-input-ignoredups t)
 (setq comint-password-prompt-regexp
-      (concat comint-password-prompt-regexp "\\|pass phrase"))
+      (concat comint-password-prompt-regexp "\\|pass phrase\\|the password\\+OTP"))
 (setq search-default-mode t) ;; sets regexp search
 (size-indication-mode)
 (setq highlight-nonselected-windows t)
@@ -378,4 +491,22 @@ If in dired-mode, attempt to copy path of file at point"
 (load custom-file)
 (put 'set-goal-column 'disabled nil)
 (add-to-list 'auto-mode-alist '("\\.pbs\\'" . sh-mode))
+;; For TRAMP
+(setq explicit-shell-file-name "/bin/bash")
+;(ido-mode t)
+(setq compilation-scroll-output t)
+(display-battery-mode t)
+
+(projectile-mode +1)
+(define-key projectile-mode-map (kbd "C-c p") 'projectile-command-map)
+
+(defun projectile-project-find-function (dir)
+  (let* ((root (projectile-project-root dir)))
+    (and root (cons 'transient root))))
+
+(with-eval-after-load 'project
+  (add-to-list 'project-find-functions 'projectile-project-find-function))
+
+(display-time-mode t)
+
 #+END_SRC
