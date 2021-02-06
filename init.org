@@ -6,7 +6,6 @@
 (when (< emacs-major-version 27)
   (package-initialize))
 
-;; Packages with no configuration
 (use-package cmake-mode)
 (use-package csv-mode)
 (use-package lua-mode)
@@ -15,11 +14,8 @@
 (use-package vlf)
 (use-package yaml-mode)
 
-;; Packages with configurations
-
 (use-package ivy
   :config
-  ;; (global-set-key (kbd "C-c f") 'swiper)
   (ivy-mode t))
 
 (use-package swiper
@@ -31,7 +27,15 @@
   (pdf-tools-install t t)
   (add-hook 'pdf-view-mode-hook (lambda () (auto-revert-mode))))
 
-
+(use-package projectile
+  :config
+  (projectile-mode +1)
+  (define-key projectile-mode-map (kbd "C-c p") 'projectile-command-map)
+  (defun projectile-project-find-function (dir)
+    (let* ((root (projectile-project-root dir)))
+      (and root (cons 'transient root))))
+  (with-eval-after-load 'project
+    (add-to-list 'project-find-functions 'projectile-project-find-function)))
 #+END_SRC
 * Defuns
 #+BEGIN_SRC emacs-lisp :tangle yes
@@ -51,11 +55,13 @@
 (defun beluga ()
   (interactive "")
   (find-file "/ssh:beluga:"))
+
 (defun find-init.org ()
   (interactive "")
   (find-file "~/.emacs.d/init.org"))
+
 ;; https://www.emacswiki.org/emacs/UnfillParagraph
-;; Stefan Monnier <foo at acm.org>. It is the opposite of fill-paragraph    
+;; Stefan Monnier <foo at acm.org>. It is the opposite of fill-paragraph
 (defun unfill-paragraph (&optional region)
   "Takes a multi-line paragraph and makes it into a single line of text."
   (interactive (progn (barf-if-buffer-read-only) '(t)))
@@ -64,11 +70,11 @@
 	(emacs-lisp-docstring-fill-column t))
     (fill-paragraph nil region)))
 
-;; Command for prefixed invokation of 'shell'
 (defun C-u_M-x_shell ()
+  "Command for prefixed invokation of `shell'"
   (interactive "")
   (let ((ido-mode-p ido-mode))
-    (if ido-mode-p 
+    (if ido-mode-p
 	(ido-mode -1))
     (let ((current-prefix-arg '(4)))
       (call-interactively #'shell))
@@ -78,7 +84,6 @@
 (defun set-C-c (key cmd)
   (global-set-key (kbd (concat "C-c " key)
 		       cmd)))
-
 
 (defun split-select ()
   (interactive "")
@@ -196,8 +201,6 @@ If in dired-mode, attempt to copy path of file at point"
 (setq my-python-mode-hook
   (lambda () (flymake-mode)))
 (add-hook 'python-mode-hook my-python-mode-hook)
-
-
 #+END_SRC
 ** C++
 #+BEGIN_SRC emacs-lisp :tangle yes
@@ -218,7 +221,6 @@ If in dired-mode, attempt to copy path of file at point"
       (lambda ()
 	(local-set-key (kbd "C-c C-v") 'ff-find-other-file)))
 (add-hook 'c++-mode-hook my-cc-mode-hook)
-
 #+END_SRC
 ** elisp
 #+BEGIN_SRC emacs-lisp :tangle yes
@@ -234,7 +236,6 @@ If in dired-mode, attempt to copy path of file at point"
 #+END_SRC
 * Org
 #+BEGIN_SRC emacs-lisp :tangle yes
-
 (setq org-agenda-files '("~/org/todo.org"))
 (setq org-default-notes-file "~/org/notes.org")
 (setq org-agenda-ndays 7)
@@ -251,7 +252,6 @@ If in dired-mode, attempt to copy path of file at point"
 	 "* %?\n")
 	("e" "Emacs" entry (file+headline "~/org/emacs.org" "todo")
 	 "* TODO %?\n")))
-
 
 (setq org-todo-keywords '((sequence "TODO(t)"           ; ready to be started
 				    "STARTED(s)"        ; in progress
@@ -286,7 +286,6 @@ If in dired-mode, attempt to copy path of file at point"
 #+END_SRC   
 * Org-roam
 #+BEGIN_SRC emacs-lisp :tangle yes
-
 (use-package org-roam
       :ensure t
       :hook
@@ -302,11 +301,9 @@ If in dired-mode, attempt to copy path of file at point"
               :map org-mode-map
               (("C-c n i" . org-roam-insert))
               (("C-c n I" . org-roam-insert-immediate))))
-
 #+END_SRC
 * Bridge
 #+BEGIN_SRC emacs-lisp :tangle yes
-
 (defun notify-me (process event)
   (message "foo")
   (start-process-shell-command "notify" "*notify*"
@@ -320,27 +317,12 @@ If in dired-mode, attempt to copy path of file at point"
 	(start-process-shell-command "rsync" "*rsync*" ,(concat "rsync -a " src " " dest))
 	'notify-me))))
 
-(make-bridge bridge-HistFitter
-	     "/home/glg/code/git/HistFitter/"
-	     "lps:work/code/HistFitter")
-(global-set-key (kbd "<f9>") 'bridge-HistFitter)
+;; Example of how to use such bridges:
 
-(make-bridge bridge-MBJ_HistFitter
-	     "/home/glg/code/git/MultiBJets/MBJ_HistFitter/"
-	     "lps:work/code/MBJ_HistFitter")
-(global-set-key (kbd "<f11>") 'bridge-MBJ_HistFitter)
-
-(make-bridge bridge-MBJ
-	     "/home/glg/code/git/MultiBJets/MBJ_Analysis/"
-	     "lps:/lcg/storage15/atlas/gagnon/code/MBJ_Analysis")
-(global-set-key (kbd "<f10>") 'bridge-MBJ)
-
-(make-bridge bridge-MBJ_NN
-	     "/home/glg/code/git/MBJ_NN/"
-	     "lps:/lcg/storage15/atlas/gagnon/code/MBJ_NN")
-(global-set-key (kbd "<f12>") 'bridge-MBJ_NN)
-
-
+;; (make-bridge bridge-HistFitter
+;; 	     "/home/glg/code/git/HistFitter/"
+;; 	     "lps:work/code/HistFitter")
+;; (global-set-key (kbd "<f9>") 'bridge-HistFitter)
 #+END_SRC
 * LaTeX
 #+BEGIN_SRC emacs-lisp :tangle yes
@@ -400,10 +382,6 @@ In that case `orgit-rev-store' stores one or more links instead."
 				  commit-id
 				  (magit-rev-format "%s" commit-id))))))))
   (global-set-key (kbd "C-c l") 'org-store-link))
-
-
-;; (use-package forge
-;;   :after magit)
 #+END_SRC
 
 * Elfeed
@@ -413,60 +391,44 @@ In that case `orgit-rev-store' stores one or more links instead."
   (global-set-key (kbd "C-c w") 'elfeed)
   (setq elfeed-feeds '("http://nullprogram.com/feed/"
                        "https://thegradient.pub/rss/"
-                       "https://distill.pub/rss.xml"
-)))
+                       "https://distill.pub/rss.xml")))
 #+END_SRC
 * Divers
 #+BEGIN_SRC emacs-lisp :tangle yes
-(show-paren-mode t)
-(delete-selection-mode)
-(setq make-backup-files t)
-(setq version-control t)
-(setq delete-old-versions t)
-(setq kept-new-versions 3)
-(setq kept-old-versions 0)
-(add-to-list 'backup-directory-alist '("." . "/home/glg/.emacs.d/backup"))
-(setq dired-listing-switches "-lh")
-(setq find-function-C-source-directory "/home/glg/code/src/emacs-26.2/src")
-(setq doc-view-resolution 300) ; default is 100
+(setq async-shell-command-display-buffer nil)
 (setq comint-input-ignoredups t)
 (setq comint-password-prompt-regexp
       (concat comint-password-prompt-regexp "\\|pass phrase\\|the password\\+OTP"))
-(setq search-default-mode t) ;; sets regexp search
-(size-indication-mode)
+(setq compilation-scroll-output t)
+(setq confirm-kill-processes nil)
+(setq custom-file "~/.emacs.d/custom.el")
+(setq delete-old-versions t)
+(setq dired-listing-switches "-lh")
+(setq doc-view-resolution 300) ; default is 100
+(setq explicit-shell-file-name "/bin/bash") ;; For TRAMP
 (setq highlight-nonselected-windows t)
-;; (setq isearch-resume-in-command-history t)
-(add-hook 'compilation-minor-mode-hook
-	  (lambda () (hl-line-mode)))
+(setq kept-new-versions 3)
+(setq kept-old-versions 0)
+(setq make-backup-files t)
+(setq mouse-drag-and-drop-region 'shift)
 (setq ring-bell-function
       (lambda ()
 	(invert-face 'mode-line)
 	(run-with-timer 0.1 nil 'invert-face 'mode-line)))
-(setq async-shell-command-display-buffer nil)
-(setq mouse-drag-and-drop-region 'shift)
-(setq confirm-kill-processes nil)
-(remove-hook 'find-file-hook 'vc-find-file-hook)
+(setq search-default-mode t) ;; sets regexp search
+(setq version-control t)
 (setq vc-handled-backends '())
-(setq custom-file "~/.emacs.d/custom.el")
+
+(add-hook 'compilation-minor-mode-hook
+	  (lambda () (hl-line-mode)))
+(add-to-list 'auto-mode-alist '("\\.pbs\\'" . sh-mode))
+(add-to-list 'backup-directory-alist '("." . "/home/glg/.emacs.d/backup"))
+(delete-selection-mode)
+(display-battery-mode t)
+(display-time-mode t)
+(remove-hook 'find-file-hook 'vc-find-file-hook)
 (load custom-file)
 (put 'set-goal-column 'disabled nil)
-(add-to-list 'auto-mode-alist '("\\.pbs\\'" . sh-mode))
-;; For TRAMP
-(setq explicit-shell-file-name "/bin/bash")
-;(ido-mode t)
-(setq compilation-scroll-output t)
-(display-battery-mode t)
-
-(projectile-mode +1)
-(define-key projectile-mode-map (kbd "C-c p") 'projectile-command-map)
-
-(defun projectile-project-find-function (dir)
-  (let* ((root (projectile-project-root dir)))
-    (and root (cons 'transient root))))
-
-(with-eval-after-load 'project
-  (add-to-list 'project-find-functions 'projectile-project-find-function))
-
-(display-time-mode t)
-
+(show-paren-mode t)
+(size-indication-mode)
 #+END_SRC
